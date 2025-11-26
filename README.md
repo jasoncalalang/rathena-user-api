@@ -12,11 +12,58 @@ A RESTful API for registering users in rAthena (Ragnarok Online private server).
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v14 or higher) OR Docker
 - MySQL/MariaDB database with rAthena schema
-- npm or yarn package manager
+- npm or yarn package manager (for local development)
 
 ## Installation
+
+### Option 1: Docker (Recommended)
+
+1. Clone the repository:
+```bash
+git clone https://github.com/jasoncalalang/rathena-user-api.git
+cd rathena-user-api
+```
+
+2. Create a `.env` file from the template:
+```bash
+cp .env.example .env
+```
+
+3. Edit `.env` with your configuration:
+```env
+DB_HOST=db
+DB_USER=ragnarok
+DB_PASSWORD=your_secure_password
+DB_NAME=ragnarok
+PORT=3000
+```
+
+4. Start with Docker Compose (includes MariaDB):
+```bash
+docker compose up -d
+```
+
+Or build and run just the API container (requires external database):
+```bash
+docker build -t rathena-user-api .
+docker run -d --name rathena-api \
+  -p 3000:3000 \
+  -e DB_HOST=your_db_host \
+  -e DB_USER=ragnarok \
+  -e DB_PASSWORD=your_password \
+  -e DB_NAME=ragnarok \
+  rathena-user-api
+```
+
+5. Verify the container is running:
+```bash
+docker compose ps
+curl http://localhost:3000/health
+```
+
+### Option 2: Local Installation
 
 1. Clone the repository:
 ```bash
@@ -29,7 +76,12 @@ cd rathena-user-api
 npm install
 ```
 
-3. Create a `.env` file in the project root with the following variables:
+3. Create a `.env` file from the template:
+```bash
+cp .env.example .env
+```
+
+4. Edit `.env` with your database configuration:
 ```env
 DB_HOST=localhost
 DB_USER=your_database_user
@@ -112,15 +164,67 @@ Run the test suite:
 npm test
 ```
 
+## Docker Commands
+
+### Using Docker Compose
+
+```bash
+# Start all services (API + Database)
+docker compose up -d
+
+# View logs
+docker compose logs -f api
+
+# Stop all services
+docker compose down
+
+# Stop and remove volumes (deletes database data)
+docker compose down -v
+
+# Rebuild after code changes
+docker compose build
+docker compose up -d
+```
+
+### Using Docker Standalone
+
+```bash
+# Build the image
+docker build -t rathena-user-api .
+
+# Run container
+docker run -d --name rathena-api \
+  -p 3000:3000 \
+  --env-file .env \
+  rathena-user-api
+
+# View logs
+docker logs -f rathena-api
+
+# Stop container
+docker stop rathena-api
+
+# Remove container
+docker rm rathena-api
+```
+
+### Health Check
+
+```bash
+# Check API health
+curl http://localhost:3000/health
+```
+
 ## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DB_HOST` | Database host address | `localhost` |
+| `DB_HOST` | Database host address | `localhost` (local) / `db` (Docker) |
 | `DB_USER` | Database username | `ragnarok` |
 | `DB_PASSWORD` | Database password | (required) |
 | `DB_NAME` | Database name | `ragnarok` |
 | `PORT` | API server port | `3000` |
+| `DB_ROOT_PASSWORD` | MariaDB root password (Docker only) | `rootpassword` |
 
 ## Error Codes
 
